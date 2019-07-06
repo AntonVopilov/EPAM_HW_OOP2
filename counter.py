@@ -11,24 +11,23 @@ import functools
 
 
 def instances_counter(cls):
-
-    def get_created_instances():
+    def get_created_instances(self=None):
         return cls.count
 
-    def reset_instances_counter():
+    def reset_instances_counter(self=None):
         res, cls.count = cls.count, 0
         return res
 
-    setattr(cls, 'count', 0)
-    setattr(cls, get_created_instances.__name__, staticmethod(get_created_instances))
-    setattr(cls, reset_instances_counter.__name__, staticmethod(reset_instances_counter))
-
-    origin_init = cls.__init__
-
     @functools.wraps(cls.__init__)
     def new_init(self, *args, **kwargs):
-        self.__class__.count += 1
+        cls.count += 1
+
         origin_init(self, *args, **kwargs)
+
+    cls.count = 0
+    cls.get_created_instances = get_created_instances
+    cls.reset_instances_counter = reset_instances_counter
+    origin_init = cls.__init__
 
     cls.__init__ = new_init
 
@@ -41,7 +40,7 @@ class User:
 
 
 if __name__ == '__main__':
-    User.get_created_instances()  # 0
+    print(User.get_created_instances())  # 0
     user, _, _ = User(), User(), User()
 
     print(user.get_created_instances())  # 3
