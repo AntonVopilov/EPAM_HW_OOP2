@@ -56,8 +56,13 @@ class HomeworkResult:
         self.solution = str(solution)
 
     def __eq__(self, other):
-        if isinstance(self, HomeworkResult) and isinstance(other, HomeworkResult):
-            return self.author == other.author and self.solution == other.solution and self.homework == other.homework
+        if isinstance(other, self.__class__):
+            return self.author == other.author and \
+                   self.solution == other.solution and \
+                   self.homework == other.homework
+
+    def __hash__(self):
+        return id(self)
 
 
 class Somebody:
@@ -71,14 +76,15 @@ class Somebody:
         self.first_name = first_name
 
     def __eq__(self, other):
-        return isinstance(other, Somebody) and self.last_name == other.last_name and self.first_name == other.first_name
+        if isinstance(other, self.__class__):
+            return self.last_name == other.last_name and \
+                   self.first_name == other.first_name
 
 
 class Student(Somebody):
     """
     Как то не правильно, что после do_homework мы возвращаем все тот же
     объект - будем возвращать какой-то результат работы (HomeworkResult)
-
     Если задание уже просрочено хотелось бы видеть исключение при do_homework,
     а не просто принт 'You are late'.
     Поднимайте исключение DeadlineError с сообщением 'You are late' вместо print.
@@ -111,17 +117,18 @@ class Teacher(Somebody):
         то полностью обнулит homework_done.
     """
 
-    homework_done = defaultdict(lambda: [HomeworkResult])
+    homework_done = defaultdict()
 
-    @staticmethod
-    def check_homework(homework_result_obj: HomeworkResult):
+    def check_homework(self, homework_result_obj: HomeworkResult):
+
         if len(homework_result_obj.solution) > 5:
-            if homework_result_obj not in Teacher.homework_done[homework_result_obj.homework]:
-                Teacher.homework_done[homework_result_obj.homework].append(homework_result_obj)
-                return True
-            else:
+
+            if homework_result_obj.homework in self.homework_done:
                 print('You try to add existing homework result')
-        else:
+            else:
+                self.homework_done[homework_result_obj.homework] = homework_result_obj
+                return True
+
             return False
 
     @staticmethod
@@ -168,5 +175,6 @@ if __name__ == '__main__':
     opp_teacher.check_homework(result_3)
 
     print(Teacher.homework_done[oop_hw])
+
     Teacher.reset_results()
     print(Teacher.homework_done)
