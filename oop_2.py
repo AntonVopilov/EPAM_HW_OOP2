@@ -131,12 +131,12 @@ class Teacher(Somebody):
 
             return False
 
-    @staticmethod
-    def reset_results(homework_obj=None):
+    @classmethod
+    def reset_results(cls, homework_obj=None):
         if not homework_obj:
-            Teacher.homework_done = Teacher.homework_done.clear()
-        elif homework_obj in Teacher.homework_done:
-            Teacher.homework_done.pop(homework_obj)
+            cls.homework_done = cls.homework_done.clear()
+        elif homework_obj in cls.homework_done:
+            cls.homework_done.pop(homework_obj)
 
     @staticmethod
     def create_homework(text, deadline_days):
